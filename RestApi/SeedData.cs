@@ -37,7 +37,7 @@ namespace RestApi
                 Rate = 23959,
             });
 
-
+           await context.SaveChangesAsync();
         }
     }
 }

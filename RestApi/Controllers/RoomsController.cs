@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RestApi.Models;
+using RestApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,17 +13,19 @@ namespace RestApi.Controllers
     [ApiController]//indicates it is an api controller 
     public class RoomsController:ControllerBase
     {
-        private readonly HotelApiDbContext _context;
+        private readonly IRoomService _roomService;
 
 
-        public RoomsController(HotelApiDbContext hotelApiDbContext)
+        public RoomsController(IRoomService roomService)
         {
-            _context = hotelApiDbContext;
+            _roomService = roomService;
         }
 
 
 
         [HttpGet(Name =nameof(GetRooms))]//Name is route
+        [ProducesResponseType(404)]
+        [ProducesResponseType(200)]
         public IActionResult GetRooms()
         {
             throw new NotImplementedException();
@@ -31,22 +34,15 @@ namespace RestApi.Controllers
         [HttpGet("{roomId}", Name =nameof(GetRoomById))]
         public async Task<ActionResult<Room>> GetRoomById(Guid roomId)
         {
-            var entity = await _context.Rooms.SingleOrDefaultAsync(x => x.Id == roomId);
+            var room = await _roomService.GetRoomAsync(roomId);
 
-            if(entity==null)
+            if(room == null)
             {
                 return NotFound();
             }
 
 
-            var resource = new Room
-            {
-                Href = Url.Link(nameof(GetRoomById), new { roomId = entity.Id }),
-                Name = entity.Name,
-                Rate = entity.Rate / 100.0m
-            };
-
-            return resource;
+            return room;
         }
     }
 }

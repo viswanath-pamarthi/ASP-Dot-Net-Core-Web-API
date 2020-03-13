@@ -15,6 +15,7 @@ using NSwag.AspNetCore;
 using RestApi.Filters;
 using RestApi.Models;
 using Microsoft.EntityFrameworkCore;
+using RestApi.Services;
 
 namespace RestApi
 {
@@ -35,6 +36,9 @@ namespace RestApi
             //this means it can be injected in to controllers
             services.Configure<HotelInfo>(Configuration.GetSection("Info"));
 
+            //Scoped means that for every incoming request new instance of defaultRoomService will be created( this id different than that of singleton sservices - which is created once)
+            //Every Entityframework objects like dbcontext uses the scoped lifetime, so any services interacting with them should be scoped as well
+            services.AddScoped<IRoomService, DefaultRoomService>();
 
 
             //use in-Memory database to quick  development and testing
