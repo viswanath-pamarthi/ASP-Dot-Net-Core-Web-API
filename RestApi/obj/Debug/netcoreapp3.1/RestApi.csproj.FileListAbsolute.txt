@@ -40,11 +40,12 @@ C:\Users\53294\Documents\Projects\RestApi\RestApi\bin\Debug\netcoreapp3.1\NSwag.
 C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\RestApi.csprojAssemblyReference.cache
 C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\staticwebassets\RestApi.StaticWebAssets.Manifest.cache
 C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\staticwebassets\RestApi.StaticWebAssets.xml
-C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\RestApi.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\RestApi.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\RestApi.AssemblyInfoInputs.cache
 C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\RestApi.AssemblyInfo.cs
 C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\RestApi.RazorTargetAssemblyInfo.cache
 C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\RestApi.csproj.CopyComplete
 C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\RestApi.dll
 C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\RestApi.pdb
+C:\Users\53294\Documents\Projects\RestApi\RestApi\bin\Debug\netcoreapp3.1\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\RestApi.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\53294\Documents\Projects\RestApi\RestApi\obj\Debug\netcoreapp3.1\RestApi.MvcApplicationPartsAssemblyInfo.cache

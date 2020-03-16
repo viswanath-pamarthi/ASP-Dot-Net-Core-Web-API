@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using RestApi.Models;
 using RestApi.Services;
 using System;
@@ -10,28 +11,95 @@ using System.Threading.Tasks;
 namespace RestApi.Controllers
 {
     [Route("/[controller]")]// [controller] template will match the name of the controller excluding word controller i.e. "GetRooms"
-    [ApiController]//indicates it is an api controller 
+    [ApiController]//indicates it is an api controller , this does some automatic model validations. if it is not present we have to start every method wiht
+    // If(!ModelState.IsValid) return BadRequest; but now if we pass invalid value for limit parameter like 0 then we could see that the error message format is not that of the error filter 
+    //we 
+
+    /* ASP.NET Core 2.1 added the [ApiController] attribute, which among other things, automatically handles model validation errors by returning a
+     * BadRequestObjectResult with ModelState passed in. In other words, if you decorate your controllers with that attribute, 
+     * you no longer need to do the if (!ModelState.IsValid) check. Additionally, the functionality is also extensible. In Startup
+     *     
+     *       services.Configure<ApiBehaviorOptions>(options =>
+            {
+                // var errorResponse = 
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var errorResponse = new ApiError(context.ModelState);
+
+                    return new BadRequestObjectResult(errorResponse);
+                };
+            });
+     */
     public class RoomsController:ControllerBase
     {
         private readonly IRoomService _roomService;
+        private readonly IOpeningService _openingService;
+        private readonly PagingOptions _defaultPagingOptions;
 
 
-        public RoomsController(IRoomService roomService)
+        public RoomsController(IRoomService roomService,
+            IOpeningService openingService,
+            IOptions<PagingOptions> defaultPagingOptionsWrapper            
+            )
         {
             _roomService = roomService;
+            _openingService = openingService;
+            _defaultPagingOptions = defaultPagingOptionsWrapper.Value;
         }
 
 
 
-        [HttpGet(Name =nameof(GetRooms))]//Name is route
-        [ProducesResponseType(404)]
+        [HttpGet(Name =nameof(GetAllRooms))]//Name is route        
         [ProducesResponseType(200)]
-        public IActionResult GetRooms()
+        public async Task<ActionResult<Collection<Room>>> GetAllRooms()
         {
-            throw new NotImplementedException();
+            var rooms = await _roomService.GetRoomsAsync();
+
+            var collection = new Collection<Room>
+            {
+                Self = Link.ToCollection(nameof(GetAllRooms)),
+                Value = rooms.ToArray()
+            };
+
+            return collection;
         }
+
+        // GET /rooms/openings
+        [HttpGet("openings", Name = nameof(GetAllRoomOpenings))]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<Collection<Opening>>> GetAllRoomOpenings([FromQuery]PagingOptions pagingOptions=null)//[]FromQuery tells that the pageoptions is taken from query string
+        {
+
+            pagingOptions.Offset = pagingOptions.Offset ?? _defaultPagingOptions.Offset;
+            pagingOptions.Limit = pagingOptions.Limit ?? _defaultPagingOptions.Limit;
+
+
+            var openings = await _openingService.GetOpeningsAsync(pagingOptions);
+
+            var collection = PagedCollection<Opening>.Create(
+
+                Link.ToCollection(nameof(GetAllRoomOpenings)),
+                openings.Items.ToArray(),
+                openings.TotalSize,
+                pagingOptions
+
+                );
+            //{
+            //    Self = Link.ToCollection(nameof(GetAllRoomOpenings)),
+            //    Value = openings.Items.ToArray(),
+            //    Size=openings.TotalSize,
+            //    Offset=pagingOptions.Offset.Value,//If any of the value of offset or Limit(nullable) is not available api will throw an null referenece
+            //    Limit=pagingOptions.Limit.Value
+            //};
+
+            return collection;
+        }
+
         //Get /rooms/{roomId}
         [HttpGet("{roomId}", Name =nameof(GetRoomById))]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(200)]
         public async Task<ActionResult<Room>> GetRoomById(Guid roomId)
         {
             var room = await _roomService.GetRoomAsync(roomId);

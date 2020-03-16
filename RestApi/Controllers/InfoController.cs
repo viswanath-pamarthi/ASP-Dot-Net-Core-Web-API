@@ -24,7 +24,7 @@ namespace RestApi.Controllers
         [ProducesResponseType(200)]
         public ActionResult<HotelInfo> Getinfo()
         {
-            _hotelInfo.Href = Url.Link(nameof(Getinfo), null);
+            _hotelInfo.Self = Link.To(nameof(Getinfo), null);
 
             return _hotelInfo;
 

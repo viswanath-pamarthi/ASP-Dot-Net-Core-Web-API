@@ -16,6 +16,9 @@ using RestApi.Filters;
 using RestApi.Models;
 using Microsoft.EntityFrameworkCore;
 using RestApi.Services;
+using AutoMapper;
+using AutoMapper.Mappers;
+using RestApi.Infrastructure;
 
 namespace RestApi
 {
@@ -35,11 +38,15 @@ namespace RestApi
             // and wraps that instance in an interface called IOptions and puts ioptions instance in services container.
             //this means it can be injected in to controllers
             services.Configure<HotelInfo>(Configuration.GetSection("Info"));
-
+            services.Configure<HotelOptions>(Configuration);
+            services.Configure<PagingOptions>(
+                Configuration.GetSection("DefaultPagingOptions"));
             //Scoped means that for every incoming request new instance of defaultRoomService will be created( this id different than that of singleton sservices - which is created once)
             //Every Entityframework objects like dbcontext uses the scoped lifetime, so any services interacting with them should be scoped as well
             services.AddScoped<IRoomService, DefaultRoomService>();
-
+            services.AddScoped<IOpeningService, DefaultOpeningService>();
+            services.AddScoped<IBookingService, DefaultBookingService>();
+            services.AddScoped<IDateLogicService, DefaultDateLogicService>();
 
             //use in-Memory database to quick  development and testing
             //TODO: Swap out for real database in production
@@ -49,6 +56,7 @@ namespace RestApi
             {
                 option.Filters.Add<JsonExceptionFilter>();
                 option.Filters.Add<RequireHttpsOrCloseAttribute>();//This will apply to entire api at once
+                option.Filters.Add<LinkRewritingFilter>();
             });
 
             services.AddRouting(options => options.LowercaseUrls = true);
@@ -64,12 +72,30 @@ namespace RestApi
                 options.ReportApiVersions = true;//will get api version in responses
                 options.ApiVersionSelector = new CurrentImplementationApiVersionSelector(options);//pass options to vfersion selector
 
+
+               
             
             });
 
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowMyApp", policy => policy.AllowAnyOrigin());//allow any origin is useful during development next commented part should be added for production in place of any wildcard      // policy => policy.WithOrigins("https://example.com"));
+            });
+
+            services.AddAutoMapper(options => { 
+                options.AddProfile<MappingProfile>(); 
+            }, typeof(Startup));
+
+
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                // var errorResponse = 
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var errorResponse = new ApiError(context.ModelState);
+
+                    return new BadRequestObjectResult(errorResponse);
+                };
             });
         }
 
