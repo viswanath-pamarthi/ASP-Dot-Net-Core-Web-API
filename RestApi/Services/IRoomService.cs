@@ -9,6 +9,6 @@ namespace RestApi.Services
     public interface IRoomService
     {
         Task<Room> GetRoomAsync(Guid id);
-        Task<IEnumerable<Room>> GetRoomsAsync();
+        Task<PagedResults<Room>> GetRoomsAsync(PagingOptions pagingOptions, SortOptions<Room, RoomEntity> sortOptions);
     }
 }

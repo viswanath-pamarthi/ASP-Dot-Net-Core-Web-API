@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using RestApi.Models;
 using System;
@@ -12,16 +13,16 @@ namespace RestApi.Services
     {
         private readonly HotelApiDbContext _context;
         private readonly IDateLogicService _dateLogicService;
-        private readonly IMapper _mapper;
+        private readonly IConfigurationProvider _mappingConfiguration;
 
         public DefaultOpeningService(
             HotelApiDbContext context,
             IDateLogicService dateLogicService,
-            IMapper mapper)
+            IConfigurationProvider mappingConfiguration)
         {
             _context = context;
             _dateLogicService = dateLogicService;
-            _mapper = mapper;
+            _mappingConfiguration = mappingConfiguration;
         }
 
         /// <summary>
@@ -79,11 +80,11 @@ namespace RestApi.Services
             return await Task.FromResult(result.ToArray());
         }
 
-        public async Task<PagedResults<Opening>> GetOpeningsAsync(PagingOptions pagingOptions)
+        public async Task<PagedResults<Opening>> GetOpeningsAsync(PagingOptions pagingOptions, SortOptions<Opening,OpeningEntity> sortOptions)
         {
             var rooms = await _context.Rooms.ToArrayAsync();
 
-            var allOpenings = new List<Opening>();
+            var allOpenings = new List<OpeningEntity>();
 
             foreach (var room in rooms)
             {
@@ -106,20 +107,26 @@ namespace RestApi.Services
                         Rate = room.Rate,
                         StartAt = slot.StartAt,
                         EndAt = slot.EndAt
-                    })
-                    .Select(model => _mapper.Map<Opening>(model));
+                    });
+                    //.Select(model => _mapper.Map<Opening>(model));
 
                 allOpenings.AddRange(openings);
             }
 
-            var pagedOpenings = allOpenings
+            IQueryable<OpeningEntity> pseudoQuery = allOpenings.AsQueryable();
+            pseudoQuery = sortOptions.Apply(pseudoQuery);
+
+            var pagedOpenings = pseudoQuery
                 .Skip(pagingOptions.Offset.Value)
-                .Take(pagingOptions.Limit.Value);
+                .Take(pagingOptions.Limit.Value)
+                .ProjectTo<Opening>(_mappingConfiguration)
+                .ToArray();
 
-
+            var size = pseudoQuery.Count();
+           
             return new PagedResults<Opening> {
                 Items = pagedOpenings,
-                TotalSize = allOpenings.Count()
+                TotalSize = size
             }
             
             ;

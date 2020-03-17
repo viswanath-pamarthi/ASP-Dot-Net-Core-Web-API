@@ -14,15 +14,18 @@ namespace RestApi.Infrastructure
         public MappingProfile()
         {
             //the properties with same name and same type wil be automatically mapped
-            CreateMap<RoomEntity, Room>().ForMember(dest => dest.Rate, opt => opt.MapFrom(src => src.Rate / 100.0m))
-                .ForMember(dest => dest.Self, opt => opt.MapFrom(src => Link.To(nameof(Controllers.RoomsController.GetRoomById), 
-                new { roomId = src.Id })));
+            CreateMap<RoomEntity, Room>()
+                .ForMember(dest => dest.Rate, opt => opt.MapFrom(src => src.Rate / 100.0m))
+                .ForMember(dest => dest.Self, opt => opt.MapFrom(src => 
+                Link.To(
+                    nameof(Controllers.RoomsController.GetRoomById), 
+                    new { roomId = src.Id })));
 
 
             CreateMap<OpeningEntity, Opening>()
                 .ForMember(dest => dest.Rate, opt => opt.MapFrom(src => src.Rate/100m) )
-                .ForMember(dest => dest.StartAt, opt => opt.MapFrom(src=> src.StartAt.UtcDateTime))
-                .ForMember(dest => dest.EndAt, opt=> opt.MapFrom(src => src.EndAt.UtcDateTime))
+                .ForMember(dest => dest.StartAt, opt => opt.MapFrom(src=> src.StartAt.ToUniversalTime()))
+                .ForMember(dest => dest.EndAt, opt=> opt.MapFrom(src => src.EndAt.ToUniversalTime()))
                 .ForMember(dest => dest.Room, opt=> opt.MapFrom(src =>
                     Link.To(
                         nameof(Controllers.RoomsController.GetRoomById), 

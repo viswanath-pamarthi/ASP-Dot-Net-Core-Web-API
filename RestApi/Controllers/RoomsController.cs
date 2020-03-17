@@ -48,18 +48,31 @@ namespace RestApi.Controllers
         }
 
 
+        /*https://localhost:44328/rooms?orderBy=Rate DESC*/
 
         [HttpGet(Name =nameof(GetAllRooms))]//Name is route        
         [ProducesResponseType(200)]
-        public async Task<ActionResult<Collection<Room>>> GetAllRooms()
+        public async Task<ActionResult<Collection<Room>>> GetAllRooms([FromQuery]PagingOptions pagingOptions,
+            [FromQuery] SortOptions<Room,RoomEntity> sortOptions)
         {
-            var rooms = await _roomService.GetRoomsAsync();
 
-            var collection = new Collection<Room>
-            {
-                Self = Link.ToCollection(nameof(GetAllRooms)),
-                Value = rooms.ToArray()
-            };
+            pagingOptions.Offset = pagingOptions.Offset ?? _defaultPagingOptions.Offset;
+            pagingOptions.Limit = pagingOptions.Limit ?? _defaultPagingOptions.Limit;
+
+            var rooms = await _roomService.GetRoomsAsync(pagingOptions, sortOptions);
+
+            //var collection = new Collection<Room>
+            //{
+            //    Self = Link.ToCollection(nameof(GetAllRooms)),
+            //    Value = rooms.ToArray(),
+            //};
+
+            var collection = PagedCollection<Room>.Create(
+                Link.ToCollection(nameof(GetAllRooms)),
+                rooms.Items.ToArray(),
+                rooms.Items.Count(),
+                pagingOptions
+                );
 
             return collection;
         }
@@ -68,14 +81,16 @@ namespace RestApi.Controllers
         [HttpGet("openings", Name = nameof(GetAllRoomOpenings))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<Collection<Opening>>> GetAllRoomOpenings([FromQuery]PagingOptions pagingOptions=null)//[]FromQuery tells that the pageoptions is taken from query string
+        public async Task<ActionResult<Collection<Opening>>> GetAllRoomOpenings([FromQuery]PagingOptions pagingOptions,
+            [FromQuery] SortOptions<Opening,OpeningEntity> sortOptions            
+            )//[]FromQuery tells that the pageoptions is taken from query string
         {
 
             pagingOptions.Offset = pagingOptions.Offset ?? _defaultPagingOptions.Offset;
             pagingOptions.Limit = pagingOptions.Limit ?? _defaultPagingOptions.Limit;
 
 
-            var openings = await _openingService.GetOpeningsAsync(pagingOptions);
+            var openings = await _openingService.GetOpeningsAsync(pagingOptions,sortOptions);
 
             var collection = PagedCollection<Opening>.Create(
 
