@@ -52,14 +52,16 @@ namespace RestApi.Controllers
 
         [HttpGet(Name =nameof(GetAllRooms))]//Name is route        
         [ProducesResponseType(200)]
-        public async Task<ActionResult<Collection<Room>>> GetAllRooms([FromQuery]PagingOptions pagingOptions,
-            [FromQuery] SortOptions<Room,RoomEntity> sortOptions)
+        public async Task<ActionResult<Collection<Room>>> GetAllRooms(
+            [FromQuery]PagingOptions pagingOptions,
+            [FromQuery] SortOptions<Room,RoomEntity> sortOptions,
+            [FromQuery] SearchOptions<Room,RoomEntity> searchOptions)
         {
 
             pagingOptions.Offset = pagingOptions.Offset ?? _defaultPagingOptions.Offset;
             pagingOptions.Limit = pagingOptions.Limit ?? _defaultPagingOptions.Limit;
 
-            var rooms = await _roomService.GetRoomsAsync(pagingOptions, sortOptions);
+            var rooms = await _roomService.GetRoomsAsync(pagingOptions, sortOptions, searchOptions);
 
             //var collection = new Collection<Room>
             //{

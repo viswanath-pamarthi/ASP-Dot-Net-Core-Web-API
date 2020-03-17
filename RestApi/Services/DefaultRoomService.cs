@@ -47,13 +47,16 @@ namespace RestApi.Services
         }
 
 
-        public async Task<PagedResults<Room>> GetRoomsAsync(PagingOptions pagingOptions, 
-            SortOptions<Room, RoomEntity> sortOptions)
+        public async Task<PagedResults<Room>> GetRoomsAsync(
+            PagingOptions pagingOptions, 
+            SortOptions<Room, RoomEntity> sortOptions,
+            SearchOptions<Room, RoomEntity> searchOptions)
         {
             //pull all rooms out of context and map each one of it to room resource - instead of duplicating code in GetRoomAsync here - we can use queryableExtentions in automapper to project all at once
 
             IQueryable<RoomEntity> query= _context.Rooms;
 
+            query = searchOptions.Apply(query);
 
             //apply sort options to query before it goes and hits the database.
             //Apply method is used to update this query  with any additional stuff we need to add sorting to the query before it goes to the database
